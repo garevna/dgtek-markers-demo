@@ -43,3 +43,7 @@ methods: {
   }
 }
 ```
+
+______________________________________________
+
+## [Demo](https://garevna.github.io/dgtek-polygons-editor-demo/)
