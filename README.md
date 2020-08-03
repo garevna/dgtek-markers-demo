@@ -1,29 +1,45 @@
-# polygons
+# dgtek-polygons
 
-## Project setup
+### Install
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+yarn add dgtek-polygons
 ```
 
-### Compiles and minifies for production
+### Import
+
 ```
-npm run build
+import 'dgtek-polygons'
+import 'dgtek-polygons/dist/dgtek-polygons.css'
 ```
 
-### Run your unit tests
+### Usage
+
 ```
-npm run test:unit
+<Polygons :saveData.sync="saveData" />
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
+### App.vue
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```
+data: () => ({
+  saveData: false
+}),
+watch: {
+  saveData (val) {
+    if (val) this.saveData()
+  }
+},
+methods: {
+  async saveData () {
+    const polygons = {
+      features: [],
+      type: 'FeatureCollection'
+    }
+    polygons.features = ['ServiceAvailable', 'BuildCommenced', 'ComingSoon']
+      .flatMap(collectionType => localStorage.getFeaturesByType(collectionType))
+
+    await axios.post(..., { data: JSON.stringify(polygons) })
+    this.saveData = false
+  }
+}
+```

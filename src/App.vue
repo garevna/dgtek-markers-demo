@@ -1,32 +1,52 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app>
+    <v-main id="dgtek-polygons">
+      <Polygons :saveData.sync="saveData"/>
+    </v-main>
+  </v-app>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<style scoped>
 
-#nav {
-  padding: 30px;
+/* #container-for-map {
+  width: 50%;
+  height: 700px;
+} */
+</style>
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+<script>
 
-    &.router-link-exact-active {
-      color: #42b983;
+import Polygons from '@/components/Polygons'
+
+export default {
+  name: 'App',
+
+  components: {
+    Polygons
+  },
+
+  data: () => ({
+    saveData: false
+  }),
+
+  watch: {
+    saveData (val) {
+      console.log('App: saveData ', val)
+      if (val) this.save()
+    }
+  },
+
+  methods: {
+    async save () {
+      const polygons = {
+        features: [],
+        type: 'FeatureCollection'
+      }
+      polygons.features = ['ServiceAvailable', 'BuildCommenced', 'ComingSoon']
+        .flatMap(collectionType => localStorage.getFeaturesByType(collectionType))
+      console.log(polygons)
+      this.saveData = false
     }
   }
 }
-</style>
+</script>
