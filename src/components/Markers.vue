@@ -1,0 +1,200 @@
+<template>
+  <v-container>
+    <v-row class="text-center">
+      <v-col cols="12" lg="7">
+        <div id="dgtek-container-for-map"></div>
+      </v-col>
+      <v-col cols="12" lg="5" v-if="ready">
+        <Diagnostics
+              :types="types"
+              :finished.sync="diagnosticsDone"
+              :opened.sync="diagnostics"
+              v-if="diagnostics && !diagnosticsDone"
+        />
+        <AddressInfo
+              :markerId.sync="selectedMarkerId"
+              v-if="!diagnostics"
+        />
+      </v-col>
+    </v-row>
+    <Button
+          :clicked.sync="diagnostics"
+          color="#09b"
+          text="DIAGNOSTICS"
+          v-if="!diagnosticsDone"
+    />
+    <Button
+          :clicked.sync="search"
+          color="#09b"
+          text="SEARCH"
+          v-if="selectedMarkerId"
+    />
+    <Button
+          :clicked.sync="save"
+          text="SAVE"
+    />
+  </v-container>
+</template>
+
+<style scoped>
+
+</style>
+
+<script>
+
+import '@/components/Storage.js'
+import Map from '@/components/map.js'
+import Diagnostics from '@/components/Diagnostics.vue'
+import AddressInfo from '@/components/AddressInfo.vue'
+import Button from '@/components/Button.vue'
+
+export default {
+  name: 'Markers',
+
+  components: {
+    Diagnostics,
+    AddressInfo,
+    Button
+  },
+
+  props: ['saveData'],
+
+  data: () => ({
+    types: ['LIT', 'Footprint'],
+    container: null,
+    map: null,
+    ready: false,
+    diagnostics: false,
+    diagnosticsDone: false,
+    selectedMarkerId: null,
+    seachMarker: null,
+    search: false,
+    newMarker: false
+  }),
+
+  computed: {
+    save: {
+      get () {
+        return this.saveData
+      },
+      set (val) {
+        this.$emit('update:saveData', val)
+      }
+    },
+    mapIsReady () {
+      return this.ready && this.map && this.Autocomplete
+    }
+  },
+
+  watch: {
+    search (val) {
+      if (!val) return
+      this.selectedMarkerId = null
+      this.map.resetSelectedMarker()
+      this.search = false
+    },
+    newMarker (val) {
+      if (!val) return
+      this.map.addNewMarker()
+      this.newMarker = false
+    },
+    diagnosticsDone (val) {
+      if (val) this.diagnostics = false
+    }
+  },
+
+  methods: {
+
+    async getData () {
+      localStorage.clear()
+      this.types.forEach(type => localStorage.setItemByName(type, []))
+      const response = await (await fetch('https://dka.dgtek.net/api/frontend/markers')).json()
+      response.features.forEach((feature, index) => {
+        if (!feature.properties.typeOf) feature.properties.typeOf = 'Footprint'
+        localStorage.setItemByName(feature.properties.id, {
+          address: feature.properties.address,
+          coordinates: feature.geometry.coordinates,
+          type: feature.properties.typeOf
+        })
+        localStorage.addMarkerToCollection(feature.properties.id, feature.properties.typeOf)
+      })
+      window.dispatchEvent(new Event('data-ready'))
+    },
+
+    readyCallback (event) {
+      this.ready = true
+    },
+
+    saveSelectedMarkerData () {
+      localStorage.setItemByName(this.selectedMarkerId, {
+        address: this.selectedMarkerAddress,
+        coordinates: this.selectedMarkerCoordinates,
+        type: this.selectedMarkerType,
+        properties: this.selectedMarkerProperties
+      })
+    },
+
+    selectedMarkerCallback (event) {
+      if (!event.details.id) return
+      this.selectedMarkerId = event.details.id
+      const markerData = localStorage.getItemByName(this.selectedMarkerId)
+      this.selectedMarkerCoordinates = markerData.coordinates
+      this.selectedMarkerAddress = markerData.address
+      this.selectedMarkerType = markerData.type
+      this.selectedMarkerProperties = markerData.properties
+    },
+
+    resetSelectedMarkerCallback (event) {
+      this.selectedMarkerId = undefined
+    },
+
+    markerPositionChangedHandler (event) {
+      this.coordinates[event.details.markerIndex] = event.details.markerCoordinates
+      this.selectedMarkerIndex = event.details.markerIndex
+      this.selectedMarkerCoordinates = event.details.markerCoordinates
+    },
+
+    emptySpaceClick (event) {
+      this.selectedMarkerId = undefined
+    },
+
+    initMap () {
+      const container = document.getElementById('dgtek-container-for-map')
+      if (container) {
+        this.container = container
+      } else {
+        this.container = document.body.appendChild(document.createElement('div'))
+        this.container.id = 'dgtek-container-for-map'
+      }
+
+      this.container.addEventListener('map-is-ready', this.readyCallback.bind(this))
+      this.container.addEventListener('marker-selected', this.selectedMarkerCallback.bind(this))
+      this.container.addEventListener('reset-selected-marker', this.resetSelectedMarkerCallback.bind(this))
+      // this.container.addEventListener('marker-position-changed', this.markerPositionChangedHandler.bind(this))
+      this.container.addEventListener('empty-field-click', this.emptySpaceClick)
+      this.container.addEventListener('new-marker', this.addNewMarker)
+
+      this.map = new Map({
+        container: this.container,
+        width: window.innerWidth / 1.5,
+        height: 700,
+        center: { lat: -37.8357725, lng: 144.9738764 }
+      })
+
+      this.container.addEventListener('marker-type-changed', this.map.changeMarkerType.bind(this.map))
+      // this.container.addEventListener('marker-address-changed', this.map.changeMarkerAddress.bind(this.map))
+      this.container.addEventListener('marker-coordinates-changed', this.map.changeMarkerCoordinates.bind(this.map))
+
+      this.ready = true
+    }
+  },
+
+  beforeMount () {
+    this.getData()
+  },
+
+  mounted () {
+    window.addEventListener('data-ready', this.initMap)
+  }
+}
+</script>

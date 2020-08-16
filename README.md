@@ -1,21 +1,21 @@
-# dgtek-polygons
+# dgtek-markers
 
 ### Install
 ```
-yarn add dgtek-polygons
+yarn add dgtek-markers
 ```
 
 ### Import
 
 ```
-import 'dgtek-polygons'
-import 'dgtek-polygons/dist/dgtek-polygons.css'
+import 'dgtek-markers'
+import 'dgtek-markers/dist/dgtek-markers.css'
 ```
 
 ### Usage
 
 ```
-<Polygons :saveData.sync="saveData" />
+<Markers :saveData.sync="saveData" />
 ```
 
 ### App.vue
@@ -26,19 +26,14 @@ data: () => ({
 }),
 watch: {
   saveData (val) {
-    if (val) this.saveData()
+    if (val) this.saveMarkers()
   }
 },
 methods: {
-  async saveData () {
-    const polygons = {
-      features: [],
-      type: 'FeatureCollection'
-    }
-    polygons.features = ['ServiceAvailable', 'BuildCommenced', 'ComingSoon']
-      .flatMap(collectionType => localStorage.getFeaturesByType(collectionType))
+  async saveMarkers () {
+    const data = localStorage.getAllMarkers()
 
-    await axios.post(..., { data: JSON.stringify(polygons) })
+    await axios.post(..., { data: JSON.stringify(data) })
     this.saveData = false
   }
 }

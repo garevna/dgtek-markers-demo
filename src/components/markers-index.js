@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import Polygons from './Polygons.vue'
+import Markers from './Markers.vue'
 
 const Components = {
-  Polygons
+  Markers
 }
 
 Object.keys(Components).forEach(name => {

@@ -1,6 +1,6 @@
 {
-  "name": "dgtek-polygons",
-  "version": "1.0.4",
+  "name": "dgtek-markers",
+  "version": "1.0.6",
   "description": "Component for npm registry",
   "author": "garevna <irina.h.fylyppova@gmail.com>",
   "keywords": [
@@ -11,12 +11,12 @@
     "registry",
     "google map"
   ],
-  "repository": "https://github.com/garevna/dgtek-components/tree/polygons",
-  "main": "./dist/dgtek-polygons.common.js",
+  "repository": "https://github.com/garevna/dgtek-components/tree/markers",
+  "main": "./dist/dgtek-markers.common.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "package": "vue-cli-service build --target lib --name dgtek-polygons ./src/components/polygons-index.js",
+    "package": "vue-cli-service build --target lib --name dgtek-markers ./src/components/markers-index.js",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },

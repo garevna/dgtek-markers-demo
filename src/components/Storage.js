@@ -5,95 +5,173 @@ Storage.prototype.setItemByName = function (name, payload) {
   this.setItem(name, JSON.stringify(payload))
 }
 
-Storage.prototype.getFeatureById = function (featureId) {
-  const feature = this.getItemByName(featureId)
-  return {
-    id: feature.properties.id,
-    coordinates: feature.geometry.coordinates[0],
-    type: feature.properties.typeOf
+/* KEYS FOR SEARCH */
+
+Storage.prototype.getAllKeys = function () {
+  const streets = new Set()
+  const localities = new Set()
+  const postalCodes = new Set()
+  const admins1 = new Set()
+  const admins2 = new Set()
+  for (const type of ['LIT', 'Footprint']) {
+    const collection = this.getItemByName(type)
+    for (const markerId of collection) {
+      const marker = this.getItemByName(markerId)
+      if (marker.properties) {
+        streets.add(marker.properties.street)
+        localities.add(marker.properties.locality)
+        postalCodes.add(marker.properties.postCode)
+        admins1.add(marker.properties.admin1)
+        admins2.add(marker.properties.admin1)
+      }
+    }
   }
+  return { streets, localities, postalCodes, admins1, admins2 }
 }
 
-Storage.prototype.getFeaturesByType = function (type) {
-  return this.getItemByName(type)
-    .map(id => this.getItemByName(id))
-    .map(feature => ({
-      id: feature.properties.id,
-      coordinates: feature.geometry.coordinates[0],
-      type: feature.properties.typeOf
+/* SEARCH */
+
+Storage.prototype.findMarkersByAddress = function (address) {
+  let result = []
+  for (const type of ['LIT', 'Footprint']) {
+    const collection = this.getItemByName(type)
+    result = result.concat(collection.filter(markerId => this.getItemByName(markerId).address === address))
+  }
+  console.log(result)
+  return result
+}
+
+Storage.prototype.findMarkersByProperty = function (propName, propValue) {
+  let result = []
+  for (const type of ['LIT', 'Footprint']) {
+    const collection = this.getItemByName(type)
+    result = result.concat(collection.filter(markerId => {
+      const marker = this.getItemByName(markerId)
+      return marker.properties && marker.properties[propName] === propValue
     }))
-}
-Storage.prototype.getFeatureCoordinates = function (featureId) {
-  return this.getFeatureById(featureId).coordinates
-}
-Storage.prototype.getFeatureType = function (featureId) {
-  return this.getFeatureById(featureId).type
+  }
+  console.log(result)
+  return result
 }
 
-Storage.prototype.addFeature = function (featureId, feature) {
-  this.setItemByName(featureId, feature)
-  const collection = this.getItemByName(feature.properties.typeOf)
-  collection.push(featureId)
-  this.setItemByName(feature.properties.typeOf, collection)
+Storage.prototype.findMarkersByStreet = function (street) {
+  return this.findMarkersByProperty('street', street)
+}
+Storage.prototype.findMarkersByLocality = function (locality) {
+  return this.findMarkersByProperty('locality', locality)
+}
+Storage.prototype.findMarkersByAdminArea1 = function (area) {
+  return this.findMarkersByProperty('admin1', area)
+}
+Storage.prototype.findMarkersByAdminArea2 = function (area) {
+  return this.findMarkersByProperty('admin2', area)
+}
+Storage.prototype.findMarkersByPostalCode = function (postCode) {
+  return this.findMarkersByProperty('postCode', postCode)
+}
+
+Storage.prototype.findMarker = function (address, coordinates) {
+  for (const type of ['LIT', 'Footprint']) {
+    const collection = this.getItemByName(type)
+    for (const markerId of collection) {
+      const marker = this.getItemByName(markerId)
+      if (marker.address === address) return Object.assign(marker, { id: markerId })
+      if (marker.address.indexOf(address) >= 0) {
+        console.warn('Partial consilience found')
+      }
+      if (JSON.stringify(marker.coordinates) === JSON.stringify(coordinates)) {
+        this.setItemByName(markerId, {
+          address,
+          coordinates,
+          type: marker.type
+        })
+        return Object.assign(marker, { id: markerId })
+      }
+    }
+  }
+  return null
+}
+
+Storage.prototype.getMarkerCoordinates = function (markerId) {
+  return this.getItemByName(markerId).coordinates
+}
+Storage.prototype.setMarkerCoordinates = function (markerId, coordinates) {
+  const marker = this.getItemByName(markerId)
+  marker.coordinates = coordinates
+  this.setItemByName(markerId, marker)
+}
+
+Storage.prototype.getMarkerType = function (markerId) {
+  return this.getItemByName(markerId).type
+}
+
+Storage.prototype.addMarker = function (markerId, marker) {
+  this.setItemByName(markerId, marker)
+  const collection = this.getItemByName(marker.type)
+  collection.push(markerId)
+  this.setItemByName(marker.type, collection)
   this.emit({
-    eventType: 'new-feature-added',
-    featureId,
-    type: feature.properties.typeOf,
-    coordinates: feature.geometry.coordinates[0]
+    eventType: 'new-marker-added',
+    markerId,
+    type: marker.type,
+    coordinates: marker.coordinates
   })
 }
 
-Storage.prototype.updateFeatureType = function (featureId, type) {
-  const feature = this.getItemByName(featureId)
-  const oldCollection = this.getItemByName(feature.properties.typeOf)
-  oldCollection.splice(oldCollection.indexOf(featureId), 1)
-  this.setItemByName(feature.properties.typeOf, oldCollection)
-  const newCollection = this.getItemByName(type)
-  newCollection.push(featureId)
-  this.setItemByName(type, newCollection)
-  feature.properties.typeOf = type
-  this.setItemByName(featureId, feature)
+Storage.prototype.addMarkerToCollection = function (markerId, markerType) {
+  const collection = this.getItemByName(markerType)
+  collection.push(markerId)
+  this.setItemByName(markerType, collection)
+}
+Storage.prototype.removeMarkerFromCollection = function (markerId, markerType) {
+  const collection = this.getItemByName(markerType)
+  console.log(collection)
+  const index = collection.findIndex(item => item.id === markerId)
+  console.log(index)
+  collection.splice(collection.findIndex(item => item.id === markerId), 1)
+  console.log(collection)
+  this.setItemByName(markerType, collection)
+}
+
+Storage.prototype.removeMarker = function (markerId) {
+  console.log(markerId, this.getItemByName(markerId).type)
+  this.removeMarkerFromCollection(markerId, this.getItemByName(markerId).type)
+  this.removeItem(markerId)
+}
+
+Storage.prototype.updateMarkerType = function (markerId, type) {
+  const marker = this.getItemByName(markerId)
+  this.removeMarkerFromCollection(markerId, marker.type)
+  this.addMarkerToCollection(markerId, type)
+  marker.type = type
+  this.setItemByName(markerId, marker)
   this.emit({
-    eventType: 'polygon-type-changed',
-    featureId,
+    eventType: 'marker-type-changed',
+    markerId,
     type
   })
 }
 
-Storage.prototype.updateMarker = function (featureId, markerIndex, markerCoordinates) {
-  const feature = this.getItemByName(featureId)
-  const [coordinates] = feature.geometry.coordinates
-  coordinates.splice(markerIndex, 1, markerCoordinates)
-  this.setItemByName(featureId, {
-    geometry: {
-      coordinates: [coordinates],
-      type: 'Polygon'
-    },
-    properties: {
-      id: featureId,
-      typeOf: feature.properties.typeOf
-    },
-    type: 'Feature'
-  })
-}
-
-Storage.prototype.updateMarkerPosition = function (featureId, markerIndex, markerCoordinates) {
-  this.updateMarker(featureId, markerIndex, markerCoordinates)
-  this.emit({
-    eventType: 'marker-position-changed',
-    featureId,
-    markerIndex,
-    markerCoordinates
-  })
-}
-Storage.prototype.updateMarkerCoordinates = function (featureId, markerIndex, markerCoordinates) {
-  this.updateMarker(featureId, markerIndex, markerCoordinates)
-  this.emit({
-    eventType: 'marker-coordinates-changed',
-    featureId,
-    markerIndex,
-    markerCoordinates
-  })
+Storage.prototype.getAllMarkers = function () {
+  const markers = {
+    type: 'FeatureCollection',
+    features: []
+  }
+  for (const type of ['LIT', 'Footprint']) {
+    const collection = this.getItemByName(type)
+    collection.forEach((markerId) => {
+      const marker = this.getItemByName(markerId)
+      markers.features.push({
+        type: 'Feature',
+        properties: Object.assign({ id: markerId, address: marker.address, type: marker.type }, marker.properties),
+        geometry: {
+          type: 'Point',
+          coordinates: marker.coordinates
+        }
+      })
+    })
+  }
+  return markers
 }
 
 Storage.prototype.emit = function (data) {

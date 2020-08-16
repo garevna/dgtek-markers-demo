@@ -1,28 +1,20 @@
 <template>
   <v-app>
-    <v-main id="dgtek-polygons">
-      <Polygons :saveData.sync="saveData"/>
+    <v-main id="dgtek-markers">
+      <Markers :saveData.sync="saveData"/>
     </v-main>
   </v-app>
 </template>
 
-<style scoped>
-
-/* #container-for-map {
-  width: 50%;
-  height: 700px;
-} */
-</style>
-
 <script>
 
-import Polygons from '@/components/Polygons'
+import Markers from '@/components/Markers.vue'
 
 export default {
   name: 'App',
 
   components: {
-    Polygons
+    Markers
   },
 
   data: () => ({
@@ -38,13 +30,8 @@ export default {
 
   methods: {
     async save () {
-      const polygons = {
-        features: [],
-        type: 'FeatureCollection'
-      }
-      polygons.features = ['ServiceAvailable', 'BuildCommenced', 'ComingSoon']
-        .flatMap(collectionType => localStorage.getFeaturesByType(collectionType))
-      console.log(polygons)
+      const markers = localStorage.getAllMarkers()
+      console.log(markers)
       this.saveData = false
     }
   }

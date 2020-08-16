@@ -2,6 +2,7 @@
   <v-btn
         large
         dark
+        text
         :color="color || '#d32f2f'"
         @click.stop="$emit('update:clicked', true)"
         style="margin-right: 8px"
@@ -19,11 +20,6 @@ export default {
   components: {
     VBtn
   },
-  props: ['text', 'clicked', 'color'],
-  watch: {
-    clicked (val) {
-      console.log(this.text, val)
-    }
-  }
+  props: ['text', 'clicked', 'color']
 }
 </script>
