@@ -1,36 +1,32 @@
 <template>
-  <v-card v-if="marker">
+  <v-dialog v-model="opened" v-if="marker" max-width="600">
       <v-card-text>
-        <h3>Actual</h3>
+        <h4>Actual</h4>
       </v-card-text>
       <v-card-text :style="{ color: validated ? '#090' : '#333'}">
         {{ marker.address }}
       </v-card-text>
-    <v-row justify="center">
-      <v-simple-table dense>
-        <template v-slot:default>
-          <tbody>
-            <tr>
-              <td class="text-left"><b>lat:</b></td>
-              <td class="text-right">{{ marker.coordinates[1] }}</td>
-              <td class="text-left"><b>lng:</b></td>
-              <td class="text-right">{{ marker.coordinates[0] }}</td>
-            </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
-    </v-row>
-    <v-row>
-      <v-card-text>
-        <h3>Formatted</h3>
+      <v-card-text class="text-center">
+        <v-simple-table dense>
+          <template v-slot:default>
+            <tbody>
+              <tr>
+                <td class="text-left"><b>lat:</b></td>
+                <td class="text-right">{{ marker.coordinates[1] }}</td>
+                <td class="text-left"><b>lng:</b></td>
+                <td class="text-right">{{ marker.coordinates[0] }}</td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
       </v-card-text>
-    </v-row>
-    <v-row>
+      <v-card-text>
+        <h4>Formatted</h4>
+      </v-card-text>
       <v-card-text :style="{ color: error ? '#a00' : '#09b' }">
         {{ formattedAddress }}
       </v-card-text>
-    </v-row>
-    <v-row justify="center">
+    <v-card-text class="text-center">
       <v-simple-table dense>
         <template v-slot:default>
           <tbody>
@@ -43,12 +39,12 @@
           </tbody>
         </template>
       </v-simple-table>
-    </v-row>
-    <v-row justify="center">
-      <!-- <v-card> -->
-        <v-card-text>
-          <h3>Details for search:</h3>
-        </v-card-text>
+    </v-card-text>
+    <v-card class="mx-auto">
+      <v-card-text>
+        <h4>Details for search:</h4>
+      </v-card-text>
+      <v-card-text class="text-center">
         <v-simple-table dense dark>
           <template v-slot:default>
             <tbody>
@@ -75,49 +71,59 @@
             </tbody>
           </template>
         </v-simple-table>
-      <!-- </v-card> -->
-    </v-row>
-    <v-row>
-      <v-card-text>
+      </v-card-text>
+    </v-card>
+    <v-bottom-navigation absolute>
         <Button
-              text="Replace"
-              color="#fa0"
+              text="UPDATE"
               :clicked.sync="replace"
               v-if="!updateAll && !finished && marker.address !== formattedAddress"
+              color="#333"
         />
         <Button
-              text="Next"
-              color="#09b"
+              text="NEXT"
               :clicked.sync="nextStep"
               v-if="!updateAll && !finished"
+              color="#333"
         />
-        <Button
-              text="Replace all"
-              color="#f50"
+        <!-- <Button
+              text="UPDATE ALL"
               :clicked.sync="updateAll"
               v-if="!finished && !updateAll"
-        />
+              color="#333"
+        /> -->
         <Button
-              text="Cancel"
-              color="#777"
+              text="CANCEL"
               :clicked.sync="close"
+              color="#333"
         />
-      </v-card-text>
-    </v-row>
-  </v-card>
+    </v-bottom-navigation>
+  </v-dialog>
 </template>
+
+<style>
+.text-left {
+  text-align: left !important;
+}
+.text-right {
+  text-align: right !important;
+}
+.text-center {
+  text-align: center !important;
+}
+</style>
 
 <script>
 
-import { VCard, VRow, VCardText } from 'vuetify/lib'
+import { VDialog, VSimpleTable, VCardText } from 'vuetify/lib'
 
 import Button from '@/components/Button.vue'
 
 export default {
   name: 'Diagnostics',
   components: {
-    VCard,
-    VRow,
+    VDialog,
+    VSimpleTable,
     VCardText,
     Button
   },
@@ -153,9 +159,7 @@ export default {
   watch: {
     replace (val) {
       if (!val) return
-      console.log('OLD:\n', localStorage.getItemByName(this.markerId))
       this.updateMarkerData()
-      console.log('NEW:\n', localStorage.getItemByName(this.markerId))
       this.replace = false
     },
     nextStep (val) {
@@ -181,20 +185,17 @@ export default {
           this.markerId = value.markerId
           this.marker = value.marker
           if (this.marker.properties) {
-            console.log(this.marker.properties)
             this.formattedAddress = this.marker.address
             this.formattedCoordinates = this.marker.coordinates
             this.properties = this.marker.properties
             continue
           }
           try {
-            console.log('OLD:\n', this.marker.address)
             const { formattedAddress, formattedCoordinates, properties } = await this.validateAddress()
             this.formattedAddress = formattedAddress
             this.formattedCoordinates = formattedCoordinates
             this.properties = properties
             this.updateMarkerData()
-            console.log('NEW:\n', this.marker.address)
           } catch (err) {
             console.warn(err)
             this.error = true

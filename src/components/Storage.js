@@ -9,24 +9,24 @@ Storage.prototype.setItemByName = function (name, payload) {
 
 Storage.prototype.getAllKeys = function () {
   const streets = new Set()
-  const localities = new Set()
+  const cities = new Set()
   const postalCodes = new Set()
-  const admins1 = new Set()
-  const admins2 = new Set()
+  const states = new Set()
+  const admins = new Set()
   for (const type of ['LIT', 'Footprint']) {
     const collection = this.getItemByName(type)
     for (const markerId of collection) {
       const marker = this.getItemByName(markerId)
       if (marker.properties) {
         streets.add(marker.properties.street)
-        localities.add(marker.properties.locality)
+        cities.add(marker.properties.city)
         postalCodes.add(marker.properties.postCode)
-        admins1.add(marker.properties.admin1)
-        admins2.add(marker.properties.admin1)
+        states.add(marker.properties.state)
+        admins.add(marker.properties.admin)
       }
     }
   }
-  return { streets, localities, postalCodes, admins1, admins2 }
+  return { streets, cities, postalCodes, states, admins }
 }
 
 /* SEARCH */
@@ -37,7 +37,6 @@ Storage.prototype.findMarkersByAddress = function (address) {
     const collection = this.getItemByName(type)
     result = result.concat(collection.filter(markerId => this.getItemByName(markerId).address === address))
   }
-  console.log(result)
   return result
 }
 
@@ -50,21 +49,20 @@ Storage.prototype.findMarkersByProperty = function (propName, propValue) {
       return marker.properties && marker.properties[propName] === propValue
     }))
   }
-  console.log(result)
   return result
 }
 
 Storage.prototype.findMarkersByStreet = function (street) {
   return this.findMarkersByProperty('street', street)
 }
-Storage.prototype.findMarkersByLocality = function (locality) {
-  return this.findMarkersByProperty('locality', locality)
+Storage.prototype.findMarkersByCity = function (city) {
+  return this.findMarkersByProperty('city', city)
 }
-Storage.prototype.findMarkersByAdminArea1 = function (area) {
-  return this.findMarkersByProperty('admin1', area)
+Storage.prototype.findMarkersByState = function (state) {
+  return this.findMarkersByProperty('state', state)
 }
-Storage.prototype.findMarkersByAdminArea2 = function (area) {
-  return this.findMarkersByProperty('admin2', area)
+Storage.prototype.findMarkersByAdminArea = function (area) {
+  return this.findMarkersByProperty('admin', area)
 }
 Storage.prototype.findMarkersByPostalCode = function (postCode) {
   return this.findMarkersByProperty('postCode', postCode)
@@ -125,16 +123,11 @@ Storage.prototype.addMarkerToCollection = function (markerId, markerType) {
 }
 Storage.prototype.removeMarkerFromCollection = function (markerId, markerType) {
   const collection = this.getItemByName(markerType)
-  console.log(collection)
-  const index = collection.findIndex(item => item.id === markerId)
-  console.log(index)
-  collection.splice(collection.findIndex(item => item.id === markerId), 1)
-  console.log(collection)
+  collection.splice(collection.findIndex(item => item === markerId), 1)
   this.setItemByName(markerType, collection)
 }
 
 Storage.prototype.removeMarker = function (markerId) {
-  console.log(markerId, this.getItemByName(markerId).type)
   this.removeMarkerFromCollection(markerId, this.getItemByName(markerId).type)
   this.removeItem(markerId)
 }

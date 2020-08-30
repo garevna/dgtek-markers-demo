@@ -1,4 +1,5 @@
 import mapConfig from '@/config/map.js'
+// const searchIcon = require('@/assets/magnify.svg')
 
 class Map {
   constructor (options) {
@@ -26,39 +27,34 @@ class Map {
     this.center = this.options.center
 
     this.setMapSize()
-    // this.container.addEventListener('activate-marker', function (event) {
-    //   if (event.details.marker) {
-    //     event.details.marker.setOptions({
-    //       icon: this.activeMarkerIcon
-    //     })
-    //   }
-    // }.bind(this))
   }
 
-  // changeMarkerPosition (markerCoordinates) {
-  //   if (!this.selectedMarkerId) return
-  //
-  //   this[this.selectedMarkerId].setOptions({
-  //     icon: this.options.icons[this[this.selectedMarkerId].type]
-  //   })
-  //
-  //   const latLng = new window.google.maps.LatLng(markerCoordinates[1], markerCoordinates[0])
-  //
-  //   this[this.selectedMarkerId].setPosition(latLng)
-  // }
+  changeMarkerAddress (markerId, address, location) {
+    if (!this.selectedMarkerId) return
+    if (this.selectedMarkerId !== markerId) return
+    this[this.selectedMarkerId].address = address
+    this[this.selectedMarkerId].setOptions({
+      title: address,
+      position: location
+    })
+    this.map.panTo(location)
+  }
 
   setSearchMarker (coordinates, address) {
-    // const latLng = new window.google.maps.LatLng(coordinates[1], coordinates[0])
     if (this.searchMarker) {
       this.searchMarker.setOptions({
         map: this.map,
-        position: { lat: coordinates[1], lng: coordinates[0] }
+        position: { lat: coordinates[1], lng: coordinates[0] },
+        title: address
       })
     } else {
       this.searchMarker = new window.google.maps.Marker({
         map: this.map,
         position: { lat: coordinates[1], lng: coordinates[0] },
-        icon: require('@/assets/magnify.svg'),
+        // icon: searchIcon,
+        // icon: 'https://maps.gstatic.com/mapfiles/place_api/icons/geocode-71.png',
+        scale: 1,
+        icon: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2018%2018%22%3E%0A%20%20%3Cpath%20fill%3D%22%23111%22%20d%3D%22M0%2C0v2v4h2V2h4V0H2H0z%20M16%2C0h-4v2h4v4h2V2V0H16z%20M16%2C16h-4v2h4h2v-2v-4h-2V16z%20M2%2C12H0v4v2h2h4v-2H2V12z%22%2F%3E%0A%3C%2Fsvg%3E%0A',
         draggable: false,
         raiseOnDrag: false,
         title: address || 'Search'
@@ -90,6 +86,9 @@ class Map {
       icon: this.activeMarkerIcon,
       zIndex: 9999999
     })
+    this.container.dispatchEvent(Object.assign(new Event('marker-selected'), {
+      details: { id: this.selectedMarkerId }
+    }))
     this.map.panTo(this[this.selectedMarkerId].position)
   }
 
@@ -97,7 +96,6 @@ class Map {
     this[this.selectedMarkerId].setOptions({
       icon: this.options.markers[this[this.selectedMarkerId].type]
     })
-    // this.selectedMarker = this[this.selectedMarkerId]
     this.container.dispatchEvent(new Event('reset-selected-marker'))
   }
 
@@ -110,27 +108,6 @@ class Map {
       }
     }))
   }
-
-  // testAddress (address) {
-  //   const geocode = new window.google.maps.Geocoder().geocode
-  //   return new Promise((resolve, reject) => {
-  //     geocode({ address }, function (results, status) {
-  //       status === 'OK'
-  //         ? resolve([results[0].geometry.location.lng(), results[0].geometry.location.lat()])
-  //         : reject(new Error(`Geocode fails: ${status}`))
-  //     })
-  //   })
-  // }
-
-  // testLocation (coordinates) {
-  //   const location = { lat: coordinates[1], lng: coordinates[0] }
-  //   const geocode = new window.google.maps.Geocoder().geocode
-  //   return new Promise((resolve, reject) => {
-  //     geocode({ location }, (results, status) => {
-  //       status === 'OK' ? resolve(results[0].formatted_address) : reject(new Error(`Geocode fails: ${status}`))
-  //     })
-  //   })
-  // }
 
   selectMarkerById (markerId) {
     this.selectedMarkerId = markerId
@@ -154,7 +131,6 @@ class Map {
 
   createMarkerClickHandler (markerId, marker) {
     return function (event) {
-      // this.testMarkerAddress(marker.id)
       marker.setOptions({
         icon: this.activeMarkerIcon
       })
@@ -181,30 +157,6 @@ class Map {
       })
     }
   }
-
-  // changeMarkerAddress (markerId, address, location) {
-  //   if (!this.selectedMarkerId) return
-  //   if (this.selectedMarkerId !== markerId) return
-  //   this[this.selectedMarkerId].address = address
-  //   this[this.selectedMarkerId].setOptions({
-  //     title: address,
-  //     position: location
-  //   })
-  //   this.map.panTo(location)
-  // }
-
-  // testMarkerAddress (markerId) {
-  //   const marker = localStorage.getItemByName(markerId)
-  //   this.__geoCoder.geocode({ address: marker.address }, (results, status) => {
-  //     if (status === 'OK') {
-  //       const latLng = results[0].geometry.location
-  //       console.log(results[0].formatted_address)
-  //       console.log(latLng.lat(), latLng.lng())
-  //     } else {
-  //       console.log(results)
-  //     }
-  //   })
-  // }
 
   removeMarker () {
     if (!this.selectedMarkerId) return
@@ -252,18 +204,18 @@ Map.prototype.createMap = async function () {
       strokeColor: '#fff',
       strokeWeight: 1.2,
       strokeOpacity: 1,
-      fillColor: '#090',
+      fillColor: '#08a',
       fillOpacity: 1,
-      scale: 4
+      scale: 3
     },
     Footprint: {
       path: window.google.maps.SymbolPath.MARKER,
       strokeColor: '#fff',
       strokeWeight: 1.2,
       strokeOpacity: 1,
-      fillColor: '#09b',
+      fillColor: '#08a',
       fillOpacity: 1,
-      scale: 4
+      scale: 3
     }
   }
   Map.prototype.activeMarkerIcon = {
@@ -273,7 +225,7 @@ Map.prototype.createMap = async function () {
     strokeOpacity: 1,
     fillColor: '#f0f',
     fillOpacity: 1,
-    scale: 5
+    scale: 4
   }
 
   this.map = new window.google.maps.Map(this.mapContainer, {

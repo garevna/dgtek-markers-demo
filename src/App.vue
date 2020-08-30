@@ -1,7 +1,10 @@
 <template>
   <v-app>
     <v-main id="dgtek-markers">
-      <Markers :saveData.sync="saveData"/>
+      <Markers
+            :saveData.sync="saveData"
+            :saveAddressDescription.sync="saveAddressDescription"
+      />
     </v-main>
   </v-app>
 </template>
@@ -18,21 +21,33 @@ export default {
   },
 
   data: () => ({
-    saveData: false
+    saveData: false,
+    saveAddressDescription: false
   }),
 
   watch: {
     saveData (val) {
       console.log('App: saveData ', val)
-      if (val) this.save()
+      if (val) this.saveMarkers()
+    },
+    saveAddressDescription (val) {
+      console.log('App: saveDescription ', val)
+      if (val) this.saveDescription()
     }
   },
 
   methods: {
-    async save () {
+    async saveMarkers () {
       const markers = localStorage.getAllMarkers()
       console.log(markers)
+      /* POST (PUT) REQUEST HERE */
       this.saveData = false
+    },
+    async saveDescription () {
+      const { id, description } = JSON.parse((sessionStorage.getItem('description')))
+      console.log(id, description)
+      /* POST (PUT) REQUEST HERE */
+      this.saveAddressDescription = false
     }
   }
 }

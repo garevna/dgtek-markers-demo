@@ -1,9 +1,10 @@
 <template>
   <v-btn
         large
-        dark
+        outlined
+        retain-focus-on-click
         text
-        :color="color || '#d32f2f'"
+        :color="color || '#fff'"
         @click.stop="$emit('update:clicked', true)"
         style="margin-right: 8px"
   >

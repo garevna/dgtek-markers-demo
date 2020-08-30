@@ -13,26 +13,54 @@
         />
         <AddressInfo
               :markerId.sync="selectedMarkerId"
+              :resellers="resellers"
               v-if="!diagnostics"
+              :descriptionChanged.sync="descriptionChanged"
         />
       </v-col>
     </v-row>
-    <Button
-          :clicked.sync="diagnostics"
-          color="#09b"
-          text="DIAGNOSTICS"
-          v-if="!diagnosticsDone"
+
+    <AddressDescription
+          :dialog.sync="addressDescriptionVisible"
+          :markerId="selectedMarkerId"
+          :descriptionChanged.sync="descriptionChanged"
     />
-    <Button
-          :clicked.sync="search"
-          color="#09b"
-          text="SEARCH"
-          v-if="selectedMarkerId"
+    <AddressLevels
+        :opened.sync="showAddressLevels"
+        :address="description.address"
+        :addressLevels.sync="description.levels"
     />
-    <Button
-          :clicked.sync="save"
-          text="SAVE"
-    />
+
+    <v-bottom-navigation
+        app
+        horizontal
+        dark
+      >
+        <Button
+              :clicked.sync="diagnostics"
+              text="DIAGNOSTICS"
+              v-if="!diagnosticsDone"
+        />
+        <Button
+              :clicked.sync="search"
+              text="SEARCH"
+              v-if="selectedMarkerId"
+        />
+        <Button
+              :clicked.sync="addressDescriptionVisible"
+              text="Address description"
+              v-if="selectedMarkerId"
+        />
+        <Button
+              :clicked.sync="showAddressLevels"
+              text="Address levels"
+              v-if="selectedMarkerId"
+        />
+        <Button
+              :clicked.sync="save"
+              text="SAVE"
+        />
+    </v-bottom-navigation>
   </v-container>
 </template>
 
@@ -46,6 +74,8 @@ import '@/components/Storage.js'
 import Map from '@/components/map.js'
 import Diagnostics from '@/components/Diagnostics.vue'
 import AddressInfo from '@/components/AddressInfo.vue'
+import AddressDescription from '@/components/AddressDescription.vue'
+import AddressLevels from '@/components/AddressLevels.vue'
 import Button from '@/components/Button.vue'
 
 export default {
@@ -54,6 +84,8 @@ export default {
   components: {
     Diagnostics,
     AddressInfo,
+    AddressDescription,
+    AddressLevels,
     Button
   },
 
@@ -61,15 +93,21 @@ export default {
 
   data: () => ({
     types: ['LIT', 'Footprint'],
+    resellers: [],
     container: null,
     map: null,
     ready: false,
     diagnostics: false,
     diagnosticsDone: false,
     selectedMarkerId: null,
+    selectedMarkerAddress: '',
     seachMarker: null,
     search: false,
-    newMarker: false
+    newMarker: false,
+    description: null,
+    addressDescriptionVisible: false,
+    showAddressLevels: false,
+    descriptionChanged: false
   }),
 
   computed: {
@@ -100,6 +138,21 @@ export default {
     },
     diagnosticsDone (val) {
       if (val) this.diagnostics = false
+    },
+    selectedMarkerId (val) {
+      if (!val) return
+      const data = localStorage.getItemByName(val)
+      this.getAddressDescription(val, data.address, data.properties)
+        .then(response => {
+          this.description = response
+        })
+    },
+    descriptionChanged (val) {
+      if (!val) return
+      const { description } = sessionStorage.getItemByName('description')
+      this.description = description
+      // this.descriptionChanged = false
+      this.addressDescriptionChanged = false
     }
   },
 
@@ -132,6 +185,7 @@ export default {
         type: this.selectedMarkerType,
         properties: this.selectedMarkerProperties
       })
+      this.descriptionChanged = true
     },
 
     selectedMarkerCallback (event) {
@@ -182,15 +236,53 @@ export default {
       })
 
       this.container.addEventListener('marker-type-changed', this.map.changeMarkerType.bind(this.map))
-      // this.container.addEventListener('marker-address-changed', this.map.changeMarkerAddress.bind(this.map))
+      this.container.addEventListener('marker-address-changed', this.map.changeMarkerAddress.bind(this.map))
       this.container.addEventListener('marker-coordinates-changed', this.map.changeMarkerCoordinates.bind(this.map))
 
       this.ready = true
+    },
+
+    async getResellers () {
+      const response = await (await fetch('https://dka.dgtek.net/api/frontend/resellers')).json()
+      this.resellers = response.data.map(item => item.site)
+    },
+
+    async getAddressDescription (markerId, address, addressComponents = sessionStorage.getItemByName('emptyProperties')) {
+      const response = await (await fetch(`https://dgtek-staging.herokuapp.com/description/${markerId}`)).json()
+      if (response.statusCode) {
+        console.warn('Error reading address description: ', response.statusCode)
+        response.description = sessionStorage.getItemByName('emptyDescription')
+      }
+      const description = Object.assign(response.description, {
+        id: markerId,
+        address,
+        addressComponents
+      })
+      sessionStorage.setItem('description', JSON.stringify({
+        id: markerId,
+        description
+      }))
+      return description
     }
   },
 
   beforeMount () {
     this.getData()
+    this.description = require('@/components/inputs/dataStructure').default
+    sessionStorage.setItemByName('emptyDescription', this.description)
+    sessionStorage.setItemByName('emptyProperties', {
+      number: '',
+      street: '',
+      city: '',
+      state: '',
+      postCode: '',
+      admin: ''
+    })
+    sessionStorage.setItemByName('description', {
+      id: '',
+      description: this.description
+    })
+    this.getResellers()
   },
 
   mounted () {
