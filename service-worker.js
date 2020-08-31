@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/dgtek-markers-demo/precache-manifest.2b15e2cbe5b32ee39ce778f33caec903.js"
+  "/dgtek-markers-demo/precache-manifest.a8ecfad96e0433e29b286030ab4da944.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "dgtek-markers"});

@@ -12,7 +12,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/dgtek-markers-demo/apple-touch-icon.png"
   },
   {
-    "revision": "d17589723aadab74e96d",
+    "revision": "3aa8aaf42d35387d78d3",
     "url": "/dgtek-markers-demo/css/app.d8d6b012.css"
   },
   {
@@ -28,12 +28,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/dgtek-markers-demo/favicon-32x32.png"
   },
   {
-    "revision": "72c438e6141ac0ac58dfe9bbb8d2be3f",
+    "revision": "3076c4dcd827bda5bd7cf4baf604be70",
     "url": "/dgtek-markers-demo/index.html"
   },
   {
-    "revision": "d17589723aadab74e96d",
-    "url": "/dgtek-markers-demo/js/app.ca1b1e3c.js"
+    "revision": "3aa8aaf42d35387d78d3",
+    "url": "/dgtek-markers-demo/js/app.3c6fce7b.js"
   },
   {
     "revision": "b6a44875e74430d3b69f",
