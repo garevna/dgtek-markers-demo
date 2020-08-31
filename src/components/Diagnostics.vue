@@ -49,20 +49,20 @@
           <template v-slot:default>
             <tbody>
               <tr>
-                <td class="text-left">Route</td>
-                <td class="text-right">{{ properties.street }}</td>
+                <td class="text-left">Street</td>
+                <td class="text-right">{{ properties.number }} {{ properties.street }}</td>
               </tr>
               <tr>
-                <td class="text-left">Locality</td>
-                <td class="text-right">{{ properties.locality }}</td>
+                <td class="text-left">City</td>
+                <td class="text-right">{{ properties.city }}</td>
               </tr>
               <tr>
-                <td class="text-left">Administrative area (level 2)</td>
-                <td class="text-right">{{ properties.admin2 }}</td>
+                <td class="text-left">Administrative area</td>
+                <td class="text-right">{{ properties.admin }}</td>
               </tr>
               <tr>
-                <td class="text-left">Administrative area (level 1)</td>
-                <td class="text-right">{{ properties.admin1 }}</td>
+                <td class="text-left">State</td>
+                <td class="text-right">{{ properties.state }}</td>
               </tr>
               <tr>
                 <td class="text-left">Postal code</td>
@@ -132,13 +132,7 @@ export default {
     return {
       markerId: '',
       marker: null,
-      properties: {
-        street: '',
-        locality: '',
-        admin1: '',
-        admin2: '',
-        postCode: ''
-      },
+      properties: sessionStorage.getItemByName('emptyProperties'),
       replace: false,
       ready: false,
       nextStep: false,
@@ -201,13 +195,7 @@ export default {
             this.error = true
             this.formattedAddress = err
             this.formattedCoordinates = ''
-            this.properties = {
-              street: '',
-              locality: '',
-              admin1: '',
-              admin2: '',
-              postCode: ''
-            }
+            this.properties = sessionStorage.getItemByName('emptyProperties')
             break
           }
         }
@@ -242,20 +230,23 @@ export default {
           this.ready = status === 'OK'
           if (status === 'OK') {
             const latLng = results[0].geometry.location
-            const route = results[0].address_components.find(item => item.types[0] === 'route')
-            const locality = results[0].address_components.find(item => item.types[0] === 'locality')
-            const admin1 = results[0].address_components.find(item => item.types[0] === 'administrative_area_level_1')
-            const admin2 = results[0].address_components.find(item => item.types[0] === 'administrative_area_level_2')
-            const postalCode = results[0].address_components.find(item => item.types[0] === 'postal_code')
+            const number = results[0].address_components.find(item => item.types[0] === 'street_number')
+            const street = results[0].address_components.find(item => item.types[0] === 'route')
+            const city = results[0].address_components.find(item => item.types[0] === 'locality')
+            const state = results[0].address_components.find(item => item.types[0] === 'administrative_area_level_1')
+            const admin = results[0].address_components.find(item => item.types[0] === 'administrative_area_level_2')
+            const postCode = results[0].address_components.find(item => item.types[0] === 'postal_code')
+
             resolve({
               formattedAddress: results[0].formatted_address,
               formattedCoordinates: [latLng.lng(), latLng.lat()],
               properties: {
-                street: route ? route.short_name : '',
-                locality: locality ? locality.short_name : '',
-                admin1: admin1 ? admin1.short_name : '',
-                admin2: admin2 ? admin2.short_name : '',
-                postCode: postalCode ? postalCode.short_name : ''
+                number: number ? number.short_name : '',
+                street: street ? street.short_name : '',
+                city: city ? city.short_name : '',
+                state: state ? state.short_name : '',
+                admin: admin ? admin.short_name : '',
+                postCode: postCode ? postCode.short_name : ''
               }
             })
           } else reject(status)

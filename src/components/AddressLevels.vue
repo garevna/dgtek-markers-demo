@@ -1,22 +1,23 @@
 <template>
   <v-dialog v-model="opened" fullscreen>
     <v-card flat class="mx-auto pa-4" max-width="100%">
-      <v-text-field
-        width="50"
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Search"
-        single-line
-        hide-details
-      ></v-text-field>
+      <v-card flat class="mx-auto" max-width="50">
+        <v-text-field
+          max-width="150"
+          class="mx-auto"
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+      </v-card>
 
     <v-data-table
         :headers="headers"
         :items="levels"
         class="elevation-1"
-        :show-select="true"
         multi-sort
-        :search="search"
       >
         <template v-slot:body="{ items }">
           <tbody>
@@ -237,8 +238,8 @@ export default {
         {
           text: 'Levels',
           align: 'start',
-          sortable: true,
-          filterable: true,
+          // sortable: true,
+          // filterable: true,
           value: 'name'
         },
         { text: 'Planned Routers', value: 'plannedRouter' },

@@ -124,17 +124,7 @@ export default {
         address: '',
         coordinates: ['', ''],
         type: null,
-        properties: {
-          number: '',
-          street: '',
-          city: '',
-          postCode: '',
-          state: '',
-          admin: '',
-          amountOfStoreys: 0,
-          storeys: [],
-          appartments: []
-        }
+        properties: sessionStorage.getItemByName('emptyProperties')
       },
       autocomplete: null,
       message: '',

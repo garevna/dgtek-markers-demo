@@ -155,7 +155,6 @@ export default {
     descriptionChanged (val) {
       if (val) this.getAddressDescription()
       this.$emit('update:descriptionChanged', false)
-      console.log(this.description)
     },
     description: {
       deep: true,
