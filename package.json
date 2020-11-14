@@ -1,10 +1,11 @@
 {
-  "name": "dgtek-markers",
-  "version": "1.0.8",
+  "name": "dgtek-buildings",
+  "version": "1.0.0",
   "description": "Component for npm registry",
   "author": "garevna <irina.h.fylyppova@gmail.com>",
   "keywords": [
     "dgtek",
+    "buildings",
     "polygons",
     "component",
     "npm",
@@ -12,11 +13,11 @@
     "google map"
   ],
   "repository": "https://github.com/garevna/dgtek-components/tree/markers",
-  "main": "./dist/dgtek-markers.common.js",
+  "main": "./dist/dgtek-buildings.common.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "package": "vue-cli-service build --target lib --name dgtek-markers ./src/components/markers-index.js",
+    "package": "vue-cli-service build --target lib --name dgtek-buildings ./src/components/buildings-index.js",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
@@ -26,7 +27,6 @@
     "README.md"
   ],
   "dependencies": {
-    "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-select": "^3.10.7",
     "vuetify": "^2.2.11"

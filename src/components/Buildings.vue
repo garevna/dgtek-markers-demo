@@ -25,7 +25,7 @@
           :markerId="selectedMarkerId"
           :descriptionChanged.sync="descriptionChanged"
     />
-    <AddressLevels
+    <BuildingLevels
         :opened.sync="showAddressLevels"
         :address="description.address"
         :addressLevels.sync="description.levels"
@@ -75,7 +75,7 @@ import Map from '@/components/map.js'
 import Diagnostics from '@/components/Diagnostics.vue'
 import AddressInfo from '@/components/AddressInfo.vue'
 import AddressDescription from '@/components/AddressDescription.vue'
-import AddressLevels from '@/components/AddressLevels.vue'
+import BuildingLevels from '@/components/BuildingLevels.vue'
 import Button from '@/components/Button.vue'
 
 export default {
@@ -85,7 +85,7 @@ export default {
     Diagnostics,
     AddressInfo,
     AddressDescription,
-    AddressLevels,
+    BuildingLevels,
     Button
   },
 
@@ -158,18 +158,19 @@ export default {
 
   methods: {
 
-    async getData () {
+    async getBuildingsList () {
       localStorage.clear()
       this.types.forEach(type => localStorage.setItemByName(type, []))
-      const response = await (await fetch('https://dka.dgtek.net/api/frontend/markers')).json()
-      response.features.forEach((feature, index) => {
-        if (!feature.properties.typeOf) feature.properties.typeOf = 'Footprint'
-        localStorage.setItemByName(feature.properties.id, {
-          address: feature.properties.address,
-          coordinates: feature.geometry.coordinates,
-          type: feature.properties.typeOf
-        })
-        localStorage.addMarkerToCollection(feature.properties.id, feature.properties.typeOf)
+      const response = await (await fetch(process.env.VUE_APP_BUILDINGS_API_ENDPOINT, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `API_KEY=${process.env.VUE_APP_BUILDINGS_API_KEY}`
+        }
+      })).json()
+      response.description.forEach((building, index) => {
+        localStorage.setItemByName(building._id, building)
+        localStorage.addMarkerToCollection(building.id, building.type)
       })
       window.dispatchEvent(new Event('data-ready'))
     },
@@ -267,7 +268,7 @@ export default {
   },
 
   beforeMount () {
-    this.getData()
+    this.getBuildingsList()
     this.description = require('@/components/inputs/dataStructure').default
     sessionStorage.setItemByName('emptyDescription', this.description)
     sessionStorage.setItemByName('emptyProperties', {

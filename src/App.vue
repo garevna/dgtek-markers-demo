@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main id="dgtek-markers">
-      <Markers
+      <Buildings
             :saveData.sync="saveData"
             :saveAddressDescription.sync="saveAddressDescription"
       />
@@ -11,13 +11,13 @@
 
 <script>
 
-import Markers from '@/components/Markers.vue'
+import Buildings from '@/components/Buildings.vue'
 
 export default {
   name: 'App',
 
   components: {
-    Markers
+    Buildings
   },
 
   data: () => ({

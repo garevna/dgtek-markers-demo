@@ -14,13 +14,8 @@
 
 <script>
 
-import { VBtn } from 'vuetify/lib'
-
 export default {
   name: 'Button',
-  components: {
-    VBtn
-  },
   props: ['text', 'clicked', 'color']
 }
 </script>

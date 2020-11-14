@@ -32,13 +32,8 @@
 
 <script>
 
-import { VSimpleTable } from 'vuetify/lib'
-
 export default {
   name: 'AddressDetails',
-  components: {
-    VSimpleTable
-  },
   props: ['number', 'street', 'city', 'state', 'postCode', 'admin']
 }
 

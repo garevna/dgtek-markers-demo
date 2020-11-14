@@ -199,33 +199,12 @@
 
 <script>
 
-import { VContainer, VDialog, VBottomNavigation, VBtn, VCard, VCardTitle, VCardText, VCardActions, VDataTable, VToolbar, VCheckbox, VRow, VCol, VDivider, VSpacer } from 'vuetify/lib'
-import { ripple } from 'vuetify/lib/directives'
-
 import Button from '@/components/Button.vue'
 
 export default {
-  name: 'AddressLevels',
+  name: 'BuildingLevels',
   components: {
-    VContainer,
-    VDialog,
-    VBottomNavigation,
-    VBtn,
-    VCard,
-    VCardTitle,
-    VCardText,
-    VCardActions,
-    VDataTable,
-    VToolbar,
-    VCheckbox,
-    VRow,
-    VCol,
-    VDivider,
-    VSpacer,
     Button
-  },
-  directives: {
-    ripple
   },
   props: ['opened', 'address', 'addressLevels'],
   data () {

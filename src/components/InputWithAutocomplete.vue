@@ -70,6 +70,7 @@
 </style>
 
 <script>
+
 export default {
   name: 'InputWithAutocomplete',
   props: ['address', 'coordinates', 'properties', 'search'],

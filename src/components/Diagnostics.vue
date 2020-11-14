@@ -115,16 +115,11 @@
 
 <script>
 
-import { VDialog, VSimpleTable, VCardText } from 'vuetify/lib'
-
 import Button from '@/components/Button.vue'
 
 export default {
   name: 'Diagnostics',
   components: {
-    VDialog,
-    VSimpleTable,
-    VCardText,
     Button
   },
   props: ['types', 'finished', 'opened'],

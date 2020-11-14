@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import Markers from './Markers.vue'
+import Buildings from './Buildings.vue'
 
 const Components = {
-  Markers
+  Buildings
 }
 
 Object.keys(Components).forEach(name => {

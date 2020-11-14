@@ -92,7 +92,6 @@
 
 <script>
 
-import { VCard, VCardText } from 'vuetify/lib'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
 
@@ -105,8 +104,6 @@ export default {
   components: {
     Button,
     InputWithAutocomplete,
-    VCard,
-    VCardText,
     vSelect,
     AddressDetails
   },

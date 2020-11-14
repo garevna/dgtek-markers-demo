@@ -116,8 +116,6 @@
 
 <script>
 
-import { VDialog, VCardText } from 'vuetify/lib'
-
 import TabOne from '@/components/tabs/TabOne.vue'
 import TabsTwoAndThree from '@/components/tabs/TabsTwoAndThree.vue'
 import TabFour from '@/components/tabs/TabFour.vue'
@@ -128,8 +126,6 @@ import Button from '@/components/Button.vue'
 export default {
   name: 'AddressDescription',
   components: {
-    VDialog,
-    VCardText,
     TabOne,
     TabsTwoAndThree,
     TabFour,
